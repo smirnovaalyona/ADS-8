@@ -4,66 +4,61 @@
 
 template<typename T, int size>
 class TPQueue {
-   private:
-  struct ITEM {
-  T data;
-  ITEM* next;
-  ITEM* prev;
-  };
-  ITEM* head;
-  ITEM* tail;
-  TPQueue::ITEM* create(const T& data, ITEM*prev) {
-  ITEM* item = new ITEM;
-  item->data = data;
-  item->next = nullptr;
-  item->prev = prev;
-  return item;
-  }
-   public:
-  TPQueue() :head(nullptr), tail(nullptr) {}
-  ~TPQueue() {
-  while (head)
-  pop();
-  }
-  void push(const T& data) {
-  if (tail && head) {
-  ITEM* current = tail;
-  while (current && data.prior > (current->data).prior) {
-  current = current->prev;
-  }
-  if (current) {
-  ITEM* temp = current->next;
-  current->next = create(data, current);
-  current = current->next;
-  current->next = temp;
-  if (temp)
-  temp->prev = current;
-  else
-  tail = current;
-  }
-  else {
-  current = create(data, nullptr);
-  current->next = head;
-  head->prev = current;
-  head = current;
-  }
-  } 
-  else {
-  head = create(data, nullptr);
-  tail = head;
-  }
-  }
-  T pop() {
-  assert(head);
-  ITEM* temp = head->next;
-  T data = head->data;
-  if (temp)
-  temp->prev = nullptr;
-  delete head;
-  head = temp;
-  return data;
-  }
-  };
+ private:
+    T* arr;
+    int begin, end;
+    int count;
+    int stepBack(int index) {
+        int result = --index;
+        if (result < 0)
+            result += size + 1;
+        return result;
+    }
+    int stepForward(int index) {
+        int result = ++index;
+        if (result > size)
+            result -= size + 1;
+        return result;
+    }
+
+ public:
+    TPQueue() :
+        size(100),
+        begin(0), end(0), count(0) {
+        arr = new T[size + 1];
+    }
+    ~TPQueue() {
+        delete[] arr;
+    }
+    void push(const T& item) {
+        assert(count < size);
+        int cur = end;
+        while (begin != cur && item.prior > arr[stepBack(cur)].prior) {
+            arr[cur] = arr[stepBack(cur)];
+            cur = stepBack(cur);
+        }
+        arr[cur] = item;
+        end = stepForward(end);
+        count++;
+    }
+    T pop() {
+        assert(count > 0);
+        T item = arr[begin];
+        count--;
+        begin = stepForward(begin);
+        return item;
+    }
+    T get() const {
+        assert(count > 0);
+        return arr[begin];
+    }
+    bool isEmpty() const {
+        return count == 0;
+    }
+    bool isFull() const {
+        return count == size;
+    }
+};
 
 struct SYM {
   char ch;
